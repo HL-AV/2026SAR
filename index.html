@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실적 상세 조회</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+            font-family: 'Pretendard', sans-serif;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .line {
+            height: 4px;
+            background-color: #1a73e8;
+            border-radius: 2px;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 25px;
+            display: none;
+        }
+        .card {
+            background-color: #f9fbfd;
+            border: 1px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #1a73e8;
+            border-left: 4px solid #1a73e8;
+            padding-left: 8px;
+            margin: 15px 0 8px 0;
+        }
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .label {
+            color: #666;
+        }
+        .val {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>실적 정보 상세 조회</h2>
+        <div class="line"></div>
+        <div class="input-group">
+            <label>성함</label>
+            <input type="text" id="userName" placeholder="이름 입력">
+        </div>
+        <div class="input-group">
+            <label>생년월일</label>
+            <input type="text" id="userBirth" placeholder="6자리 입력 (예: 820406)">
+        </div>
+        <button onclick="search()">조회하기</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 엑셀 26개 행 데이터 전체 반영
+        const d = [
+    {"n": "선순영", "b": "710307", "wd": 20, "m": 28321694, "mt": 24400000, "mp": "116.1%", "qt": 241, "qc": 368, "qp": "152.7%"},
+    {"n": "김순자", "b": "590703", "wd": 21, "m": 19989551, "mt": 21400000, "mp": "93.4%", "qt": 210, "qc": 133, "qp": "63.3%"},
+    {"n": "김정희", "b": "670720", "wd": 20, "m": 14707953, "mt": 21100000, "mp": "69.7%", "qt": 208, "qc": 168, "qp": "80.8%"},
+    {"n": "이혜정", "b": "690115", "wd": 19, "m": 17791705, "mt": 17910000, "mp": "99.3%", "qt": 190, "qc": 112, "qp": "58.9%"},
+    {"n": "홍금화", "b": "820406", "wd": 18, "m": 20448620, "mt": 20000000, "mp": "102.2%", "qt": 251, "qc": 271, "qp": "108.0%"},
+    {"n": "이예란", "b": "830428", "wd": 20, "m": 8768123, "mt": 18630000, "mp": "47.1%", "qt": 200, "qc": 95, "qp": "47.5%"},
+    {"n": "윤혜림", "b": "950728", "wd": 21, "m": 23221194, "mt": 22700000, "mp": "102.3%", "qt": 298, "qc": 324, "qp": "108.7%"},
+    {"n": "이지혜", "b": "860902", "wd": 20, "m": 18128357, "mt": 22800000, "mp": "79.5%", "qt": 249, "qc": 195, "qp": "78.3%"},
+    {"n": "황국화", "b": "780717", "wd": 18, "m": 26500538, "mt": 28800000, "mp": "92.0%", "qt": 289, "qc": 323, "qp": "111.8%"},
+    {"n": "최미란", "b": "870823", "wd": 19, "m": 38598722, "mt": 36500000, "mp": "105.7%", "qt": 363, "qc": 515, "qp": "141.9%"},
+    {"n": "김주영", "b": "781208", "wd": 19, "m": 24531021, "mt": 21700000, "mp": "113.0%", "qt": 223, "qc": 230, "qp": "103.1%"},
+    {"n": "최순정", "b": "680223", "wd": 21, "m": 26310422, "mt": 23900000, "mp": "110.1%", "qt": 278, "qc": 171, "qp": "61.5%"},
+    {"n": "황미현", "b": "831221", "wd": 20, "m": 17691085, "mt": 22700000, "mp": "77.9%", "qt": 195, "qc": 109, "qp": "55.9%"},
+    {"n": "권혜윤", "b": "701011", "wd": 14, "m": 13311145, "mt": 14900000, "mp": "89.3%", "qt": 172, "qc": 112, "qp": "65.1%"},
+    {"n": "김민주", "b": "751016", "wd": 13, "m": 11087499, "mt": 13100000, "mp": "84.6%", "qt": 130, "qc": 71, "qp": "54.6%"},
+    {"n": "김정민", "b": "650820", "wd": 8, "m": 4999655, "mt": 8400000, "mp": "59.5%", "qt": 80, "qc": 26, "qp": "32.5%"},
+    {"n": "김현희", "b": "970714", "wd": 3, "m": 2144554, "mt": 3200000, "mp": "67.0%", "qt": 30, "qc": 16, "qp": "53.3%"},
+    {"n": "민효진", "b": "880210", "wd": 8, "m": 5052746, "mt": 8800000, "mp": "57.4%", "qt": 144, "qc": 19, "qp": "13.2%"},
+    {"n": "박미정", "b": "690822", "wd": 4, "m": 5349942, "mt": 4300000, "mp": "124.4%", "qt": 40, "qc": 10, "qp": "25.0%"},
+    {"n": "박서윤", "b": "991204", "wd": 8, "m": 3987283, "mt": 8000000, "mp": "49.8%", "qt": 80, "qc": 14, "qp": "17.5%"},
+    {"n": "신주희", "b": "770811", "wd": 5, "m": 7354658, "mt": 6100000, "mp": "120.6%", "qt": 55, "qc": 51, "qp": "92.7%"},
+    {"n": "이금복", "b": "700720", "wd": 3, "m": 1324006, "mt": 3300000, "mp": "40.1%", "qt": 30, "qc": 2, "qp": "6.7%"},
+    {"n": "이은비", "b": "890707", "wd": 10, "m": 19591514, "mt": 11000000, "mp": "178.1%", "qt": 180, "qc": 123, "qp": "68.3%"},
+    {"n": "이은주", "b": "761230", "wd": 13, "m": 15493344, "mt": 13500000, "mp": "114.8%", "qt": 170, "qc": 208, "qp": "122.4%"},
+    {"n": "최아리아", "b": "800716", "wd": 1, "m": 2249651, "mt": 1100000, "mp": "204.5%", "qt": 10, "qc": 11, "qp": "110.0%"},
+    {"n": "김은미", "b": "711027", "wd": 19, "m": 19707502, "mt": 21600000, "mp": "91.2%", "qt": 200, "qc": 88, "qp": "44.0%"},
+    {"n": "정인지", "b": "810506", "wd": 20, "m": 23130683, "mt": 22200000, "mp": "100.0%", "qt": 255, "qc": 336, "qp": "131.8%"},
+    {"n": "최민경", "b": "850813", "wd": 20, "m": 21243476, "mt": 23800000, "mp": "89.3%", "qt": 220, "qc": 137, "qp": "62.3%"},
+    {"n": "이은심", "b": "811005", "wd": 20, "m": 27668063, "mt": 36000000, "mp": "76.9%", "qt": 423, "qc": 478, "qp": "113.0%"},
+    {"n": "김은미", "b": "711027", "wd": 1, "m": 234093, "mt": 1000000, "mp": "23.4%", "qt": 10, "qc": 1, "qp": "10.0%"},
+    {"n": "정인지", "b": "811005", "wd": 1, "m": 664820, "mt": 1000000, "mp": "66.5%", "qt": 10, "qc": 1, "qp": "10.0%"},
+    {"n": "최민경", "b": "850118", "wd": 3, "m": 1441277, "mt": 3700000, "mp": "39.0%", "qt": 33, "qc": 9, "qp": "27.3%"},
+    {"n": "이은심", "b": "811005", "wd": 4, "m": 2519824, "mt": 4000000, "mp": "63.0%", "qt": 40, "qc": 34, "qp": "85.0%"}
+    {"n": "장은영", "b": "850118", "wd": 9, "m": 3962466, "mt": 9000000, "mp": "44.0%", "qt": 90, "qc": 19, "qp": "21.1%"}
+    {"n": "장은영", "b": "810704", "wd": 12, "m": 11842240, "mt": 12000000, "mp": "98.7%", "qt": 120, "qc": 52, "qp": "43.3%"}
+        ];
+
+        function search() {
+            const n = document.getElementById('userName').value.trim();
+            const b = document.getElementById('userBirth').value.trim();
+            const r = document.getElementById('result');
+            const res = d.filter(u => u.n === n && u.b === b);
+
+            if (res.length > 0) {
+                r.style.display = 'block';
+                let h = `<p style="text-align:center; font-size:12px; color:#888;">총 ${res.length}건 조회됨</p>`;
+                
+                res.forEach((u, i) => {
+                    h += `
+                        <div class="card">
+                            <div style="font-weight:bold; text-align:center; margin-bottom:10px;">데이터 내역 #${i + 1}</div>
+                            <div class="section-title">📊 매출 실적</div>
+                            <div class="data-row"><span class="label">근무일수</span><span class="val">${u.wd}일</span></div>
+                            <div class="data-row"><span class="label">실적</span><span class="val">${u.m.toLocaleString()}원</span></div>
+                            <div class="data-row"><span class="label">타겟</span><span class="val">${u.mt.toLocaleString()}원</span></div>
+                            <div class="data-row"><span class="label">달성율</span><span class="val" style="color:#1a73e8">${u.mp}</span></div>
+                            
+                            <div class="section-title">📦 품목 실적</div>
+                            <div class="data-row"><span class="label">수량</span><span class="val">${u.qc}개</span></div>
+                            <div class="data-row"><span class="label">타겟</span><span class="val">${u.qt}개</span></div>
+                            <div class="data-row"><span class="label">달성율</span><span class="val" style="color:#1a73e8">${u.qp}</span></div>
+                        </div>`;
+                });
+                r.innerHTML = h;
+            } else {
+                alert("일치하는 정보가 없습니다.");
+                r.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
